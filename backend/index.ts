@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import { tavily } from "@tavily/core";
 import { llm } from "./llm.ts";
 import { PROMPT_TEMPLATE, SYSTEM_PROMPT } from "./prompt.ts";
+import { prisma } from "./db.ts";
 
 dotenv.config();
 
@@ -11,6 +12,15 @@ const tavilyClient = tavily({ apiKey: process.env.TAVILY_API_KEY });
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
+
+
+app.post("/signup", async (req, res) => {});
+
+app.post("/signin", async (req, res) => {});
+
+app.get("/convesations", async (req, res) => {});
+
+app.get("/conversation/:conversationId", async (req, res) => {});
 
 app.post("/perp_ask", async (req, res) => {
   const query = req.body.query;
@@ -55,12 +65,13 @@ app.post("/perp_ask", async (req, res) => {
   res.end();
 });
 
-app.post("/perp_ask/followup", async (req, res) => {
-  
+app.post("/perp_ask/follow_up", async (req, res) => {
+  // step 1: get the follow up question from the request body
+  //step 2: get existing chat from db
+  // step 2.5: do context engineering
+  // step 3: forward full history + follow up question to llm
+  //step 4: stream back the response to the client
 });
-
-
-
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
