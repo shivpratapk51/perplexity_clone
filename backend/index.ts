@@ -1,6 +1,8 @@
 import express from "express";
 import dotenv from "dotenv";
 import { tavily } from "@tavily/core";
+import { llm } from "./llm.ts";
+import { PROMPT_TEMPLATE, SYSTEM_PROMPT } from "./prompt.ts";
 
 dotenv.config();
 
@@ -11,14 +13,7 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 
 app.post("/perp_ask", async (req, res) => {
-  // Step-1 - get query
   const query = req.body.query;
-
-  // Step-2 - make sure user has enough credits to hit endpoint
-
-  // Step-3 - check if we have a cached response for the query, if so return it
-
-  // Step-4 - websearch the sources for the query and get the top 3-5 results
 
   const webSearchResponse = await tavilyClient.search(query, {
     searchDepth: "advanced",
@@ -26,12 +21,42 @@ app.post("/perp_ask", async (req, res) => {
   });
   const webSearchResults = webSearchResponse.results;
 
-  // Step-5 -  some context engineerign on the prompt + web search results
+  const prompt = PROMPT_TEMPLATE.replace(
+    "{{WEB_SEARCH_RESULTS}}",
+    JSON.stringify(webSearchResults),
+  ).replace("{{USER_QUERY}}", query);
 
-  // Step-6 - hit the llm and stream back the response to the user
+  const llmResponse = await llm({
+    query: prompt,
+    systemPrompt: SYSTEM_PROMPT,
+    stream: true,
+    maxTokens: 1000,
+    topP: 1,
+    temperature: 0.2,
+  });
 
-  // Step-7 - also stream back the sources and follow up questions to the user (which we can get from the another parraph in the llm call)
+  res.header("Cache-Control", "no-cache");
+  res.header("Content-Type", "text/event-stream");
+
+  for await (const chunk of llmResponse) {
+    res.write(chunk);
+  }
+
+  res.write("\n<sources>\n");
+  res.write(
+    JSON.stringify(
+      webSearchResults.map((result) => ({
+        url: result.url,
+        title: result.title,
+      })),
+    ),
+  );
+  res.write("\n</sources>\n");
+  res.end();
 });
+
+
+
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
