@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router";
-import Auth from "./pages/auth";
+import Auth from "./pages/Auth";
+import Dashboard from "./pages/Dashboard";
 
 
 function App() {
@@ -9,6 +10,7 @@ function App() {
     <Routes>
       {/* Routes go here */}
       <Route path="/auth" element={<Auth />} />
+      <Route path="/dashboard" element={<Dashboard />} />
     </Routes>
   </BrowserRouter>
 }

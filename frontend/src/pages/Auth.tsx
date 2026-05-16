@@ -1,23 +1,25 @@
-import { Button } from '@/components/ui/button'
-import React from 'react'
-import { createClient } from '@supabase/supabase-js'
+import { Button } from "@/components/ui/button";
+import { createSupabaseClient } from "@/lib/supabase/client";
 
-type Provider = "GOOGLE" | "GITHUB"
-
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-)
+const supabase = createSupabaseClient();
 const Auth = () => {
-    function login(provider: Provider){
-
+  async function login(provider: "google" | "github") {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: provider
+    })
+    if (error) {
+      console.error(error);
+    }else {
+      await console.log(data);
+      
     }
+  }
   return (
     <div>
-      <Button onClick={()=>login("GOOGLE")}>Login with Google</Button>
-      <Button onClick={()=>login("GITHUB")}>Login with GitHub</Button>
+      <Button onClick={() => login("google")}>Login with Google</Button>
+      <Button onClick={() => login("github")}>Login with GitHub</Button>
     </div>
-  )
-}
+  );
+};
 
-export default Auth
+export default Auth;

@@ -4,6 +4,9 @@ import { tavily } from "@tavily/core";
 import { llm } from "./llm.ts";
 import { PROMPT_TEMPLATE, SYSTEM_PROMPT } from "./prompt.ts";
 import { prisma } from "./db.ts";
+import { authMiddleware } from "./middleware.ts";
+import cors from "cors"
+
 
 dotenv.config();
 
@@ -12,17 +15,21 @@ const tavilyClient = tavily({ apiKey: process.env.TAVILY_API_KEY });
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
-
+app.use(cors())
 
 app.post("/signup", async (req, res) => {});
 
 app.post("/signin", async (req, res) => {});
 
-app.get("/convesations", async (req, res) => {});
+app.get("/conversations", authMiddleware, async (req, res) => {
+  res.json({
+    userId: req.userId
+  })
+});
 
-app.get("/conversation/:conversationId", async (req, res) => {});
+app.get("/conversation/:conversationId", authMiddleware, async (req, res) => {});
 
-app.post("/perp_ask", async (req, res) => {
+app.post("/perp_ask", authMiddleware, async (req, res) => {
   const query = req.body.query;
 
   const webSearchResponse = await tavilyClient.search(query, {
@@ -65,7 +72,7 @@ app.post("/perp_ask", async (req, res) => {
   res.end();
 });
 
-app.post("/perp_ask/follow_up", async (req, res) => {
+app.post("/perp_ask/follow_up", authMiddleware, async (req, res) => {
   // step 1: get the follow up question from the request body
   //step 2: get existing chat from db
   // step 2.5: do context engineering
