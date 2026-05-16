@@ -1,15 +1,16 @@
-import { Button } from "./components/ui/button";
+import { BrowserRouter, Route, Routes } from "react-router";
+import Auth from "./pages/auth";
 
 
 function App() {
 
 
-  return <>
-    <div className="flex items-center justify-center h-screen bg-amber-600">
-      hello world
-      <Button>Hii!!</Button>
-    </div>
-  </>;
+  return <BrowserRouter>
+    <Routes>
+      {/* Routes go here */}
+      <Route path="/auth" element={<Auth />} />
+    </Routes>
+  </BrowserRouter>
 }
 
 export default App;
